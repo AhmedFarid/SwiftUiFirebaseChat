@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CC04D7E28FD5DF400D8EBCF /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC04D7D28FD5DF400D8EBCF /* ImagePicker.swift */; };
 		FA78713628F6D636008714B6 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FA78713528F6D636008714B6 /* FirebaseAuth */; };
 		FA78713828F6D636008714B6 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = FA78713728F6D636008714B6 /* FirebaseStorage */; };
 		FA78713A28F6D9FB008714B6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA78713928F6D9FB008714B6 /* GoogleService-Info.plist */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0CC04D7D28FD5DF400D8EBCF /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		FA78713928F6D9FB008714B6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		FA81F22328F5A61300B763E7 /* SwiftUiFirebaseChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftUiFirebaseChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA81F22628F5A61300B763E7 /* SwiftUiFirebaseChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUiFirebaseChatApp.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 			children = (
 				FA81F22628F5A61300B763E7 /* SwiftUiFirebaseChatApp.swift */,
 				FA81F22828F5A61300B763E7 /* AuthView.swift */,
+				0CC04D7D28FD5DF400D8EBCF /* ImagePicker.swift */,
 				FA81F22A28F5A61500B763E7 /* Assets.xcassets */,
 				FA78713928F6D9FB008714B6 /* GoogleService-Info.plist */,
 				FA81F22C28F5A61500B763E7 /* Preview Content */,
@@ -152,6 +155,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0CC04D7E28FD5DF400D8EBCF /* ImagePicker.swift in Sources */,
 				FA81F22928F5A61300B763E7 /* AuthView.swift in Sources */,
 				FA81F22728F5A61300B763E7 /* SwiftUiFirebaseChatApp.swift in Sources */,
 			);
