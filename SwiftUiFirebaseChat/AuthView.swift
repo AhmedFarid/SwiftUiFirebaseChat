@@ -12,7 +12,7 @@ import FirebaseStorage
 class FirebaseManger: NSObject {
   let auth: Auth
   let storage: Storage
-  
+  let fireStore: Firestore
   static let shared = FirebaseManger()
    
   
@@ -20,6 +20,7 @@ class FirebaseManger: NSObject {
     FirebaseApp.configure()
     self.auth = Auth.auth()
     self.storage = Storage.storage()
+    self.fireStore = Firestore.firestore()
     super.init()
   }
 }
@@ -162,8 +163,26 @@ struct AuthView: View {
         }
         self.loginStatusMessage = "Successfully stored image with url: \(url?.absoluteString ?? "")"
         print(url?.absoluteString ?? "")
+        
+        guard let url = url else { return }
+        storeUserInformation(imageProfileUrl: url)
       }
     }
+  }
+  
+  private func storeUserInformation(imageProfileUrl: URL) {
+    guard let uid = FirebaseManger.shared.auth.currentUser?.uid else { return }
+    let userData = ["email": self.email, "uid": uid,"profileImageUrl": imageProfileUrl.absoluteString]
+    FirebaseManger.shared.fireStore.collection("users")
+      .document(uid).setData(userData) { error in
+        if let error = error {
+          print(error)
+          self.loginStatusMessage = "\(error)"
+          return
+        }
+        
+        print("Success")
+      }
   }
 }
 
