@@ -6,26 +6,11 @@
 //
 
 import SwiftUI
-import Firebase
-import FirebaseStorage
-
-class FirebaseManger: NSObject {
-  let auth: Auth
-  let storage: Storage
-  let fireStore: Firestore
-  static let shared = FirebaseManger()
-   
-  
-  override init() {
-    FirebaseApp.configure()
-    self.auth = Auth.auth()
-    self.storage = Storage.storage()
-    self.fireStore = Firestore.firestore()
-    super.init()
-  }
-}
 
 struct AuthView: View {
+  
+  let didCompleteLoginProcess: () -> ()
+  
   var authMethod = ["Login", "Create Account"]
   
   @State private var isLoginMode = "Login"
@@ -33,7 +18,7 @@ struct AuthView: View {
   @State private var password = ""
   @State private var loginStatusMessage = ""
   
-  @State var shouldShowImagePicker = false
+  @State private var shouldShowImagePicker = false
   
   var body: some View {
     NavigationView {
@@ -126,6 +111,12 @@ struct AuthView: View {
   }
   
   private func createNewAccount() {
+    
+    if self.image == nil {
+      self.loginStatusMessage = "You must select an avatar image"
+      return 
+    }
+    
     FirebaseManger.shared.auth.createUser(withEmail: email, password: password) { result, error in
       if let error = error {
         self.loginStatusMessage = "error in create account \(error.localizedDescription)"
@@ -143,6 +134,7 @@ struct AuthView: View {
         return
       }
       self.loginStatusMessage = "Success To login user id: \(result?.user.uid ?? "")"
+      self.didCompleteLoginProcess()
     }
   }
   
@@ -182,6 +174,8 @@ struct AuthView: View {
         }
         
         print("Success")
+        
+        self.didCompleteLoginProcess()
       }
   }
 }
@@ -190,6 +184,8 @@ struct AuthView: View {
 
 struct AuthView_Previews: PreviewProvider {
   static var previews: some View {
-    AuthView()
+    AuthView(didCompleteLoginProcess: {
+      
+    })
   }
 }
