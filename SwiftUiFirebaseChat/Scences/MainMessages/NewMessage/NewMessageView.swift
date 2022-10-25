@@ -39,6 +39,8 @@ class CreateNewMessageViewModel: ObservableObject {
 
 struct NewMessageView: View {
   
+  let didSelectNewUser: (ChatUser) -> ()
+  
   // for dismiss view cancel button
   @Environment(\.presentationMode) var presentationMode
   
@@ -57,6 +59,7 @@ struct NewMessageView: View {
         ForEach(vm.users) { user in
           Button {
             presentationMode.wrappedValue.dismiss()
+            didSelectNewUser(user)
           } label: {
             HStack(spacing: 16) {
               WebImage(url: URL(string: user.profileImageUrl))
@@ -95,6 +98,7 @@ struct NewMessageView: View {
 
 struct NewMessageView_Previews: PreviewProvider {
   static var previews: some View {
-    NewMessageView()
+    //NewMessageView()
+    MainMessagesView()
   }
 }
