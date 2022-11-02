@@ -64,6 +64,9 @@ class ChatLogViewModel: ObservableObject {
             self.chatMessages.append(.init(documentId: change.document.documentID, data: data))
           }
         })
+        DispatchQueue.main.async {
+          self.count += 1
+        }
       }
   }
   
@@ -103,6 +106,7 @@ class ChatLogViewModel: ObservableObject {
       
       print("Recipient saved message as well ")
       self.chatText = ""
+      self.count += 1
     }
   }
   
@@ -123,7 +127,7 @@ struct ChatLogView: View {
   
   var body: some View {
     
- //MARK: - MainView
+    //MARK: - MainView
     //MARK: - Chat Message
     ZStack {
       messageView
@@ -133,21 +137,29 @@ struct ChatLogView: View {
     //MARK: - MAIN VIEW UI
     .navigationTitle(chatUser?.email ?? "")
     .navigationBarTitleDisplayMode(.inline)
-    .navigationBarItems(trailing: Button(action: {
-      vm.count += 1
-    }, label: {
-      Text("Count: \(vm.count)")
-    }))
+    
   }
+  
+  static let emptyScrollToString = "Empty"
   
   private var messageView: some View {
     VStack {
       ScrollView {
-        ForEach(vm.chatMessages) {message in
-          MessageView(message: message)
-        }
-        HStack {
-          Spacer()
+        ScrollViewReader { scrollViewProxy in
+          VStack {
+            ForEach(vm.chatMessages) {message in
+              MessageView(message: message)
+            }
+            HStack {
+              Spacer()
+            }
+            .id(ChatLogView.emptyScrollToString)
+          }
+          .onReceive(vm.$count) { _  in
+            withAnimation(.easeOut(duration: 0.5)) {
+              scrollViewProxy.scrollTo(ChatLogView.emptyScrollToString, anchor: .bottom)
+            }
+          }
         }
       }
       .background(Color(.init(white: 0.9, alpha: 1)))
