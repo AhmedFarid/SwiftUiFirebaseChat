@@ -104,9 +104,9 @@ class ChatLogViewModel: ObservableObject {
       print("Recipient saved message as well ")
       self.chatText = ""
     }
-      
-    
   }
+  
+  @Published var count = 0
 }
 
 struct ChatLogView: View {
@@ -133,40 +133,18 @@ struct ChatLogView: View {
     //MARK: - MAIN VIEW UI
     .navigationTitle(chatUser?.email ?? "")
     .navigationBarTitleDisplayMode(.inline)
+    .navigationBarItems(trailing: Button(action: {
+      vm.count += 1
+    }, label: {
+      Text("Count: \(vm.count)")
+    }))
   }
   
   private var messageView: some View {
     VStack {
       ScrollView {
         ForEach(vm.chatMessages) {message in
-          VStack {
-            if message.fromId == FirebaseManger.shared.auth.currentUser?.uid {
-              HStack {
-                Spacer()
-                HStack {
-                  Text(message.text)
-                    .foregroundColor(.white)
-                }
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(8)
-              }
-            }else {
-              HStack {
-                
-                HStack {
-                  Text(message.text)
-                    .foregroundColor(.black)
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(8)
-                Spacer()
-              }
-            }
-          }
-          .padding(.horizontal)
-          .padding(.top,8)
+          MessageView(message: message)
         }
         HStack {
           Spacer()
@@ -188,7 +166,7 @@ struct ChatLogView: View {
         .font(.system(size: 24))
         .foregroundColor(Color(.darkGray))
       ZStack {
-        //DescriptionPlaceholder()
+        DescriptionPlaceholder()
         TextEditor(text: $vm.chatText)
           .opacity(vm.chatText.isEmpty ? 0.5 : 1)
       }
@@ -207,6 +185,55 @@ struct ChatLogView: View {
     }
     .padding(.horizontal)
     .padding(.vertical, 8)
+  }
+}
+
+struct MessageView: View {
+  
+  let message: ChatMessage
+  
+  var body: some View {
+    VStack {
+      if message.fromId == FirebaseManger.shared.auth.currentUser?.uid {
+        HStack {
+          Spacer()
+          HStack {
+            Text(message.text)
+              .foregroundColor(.white)
+          }
+          .padding()
+          .background(Color.blue)
+          .cornerRadius(8)
+        }
+      }else {
+        HStack {
+          
+          HStack {
+            Text(message.text)
+              .foregroundColor(.black)
+          }
+          .padding()
+          .background(Color.white)
+          .cornerRadius(8)
+          Spacer()
+        }
+      }
+    }
+    .padding(.horizontal)
+    .padding(.top,8)
+  }
+}
+
+private struct DescriptionPlaceholder: View {
+  var body: some View {
+    HStack {
+      Text("Description")
+        .foregroundColor(Color(.gray))
+        .font(.system(size: 17))
+        .padding(.leading,5)
+        .padding(.top, -4)
+      Spacer()
+    }
   }
 }
 
