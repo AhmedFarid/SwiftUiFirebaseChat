@@ -7,6 +7,28 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
+import Firebase
+
+struct RecentMessage: Identifiable {
+  var id: String { documentId }
+  
+  let documentId: String
+  let text, fromId, toId: String
+  let email, profileImageUrl: String
+  let timestamp: Timestamp
+  
+  
+  init(documentId: String,data: [String: Any]) {
+    self.documentId = documentId
+    self.text = data["text"] as? String ?? ""
+    self.timestamp = data["timestamp"] as? Timestamp ?? Timestamp(date: Date())
+    self.email = data["email"] as? String ?? ""
+    self.fromId = data["fromId"] as? String ?? ""
+    self.toId = data["toId"] as? String ?? ""
+    self.profileImageUrl = data["profileImageUrl"] as? String ?? ""
+  }
+  
+}
 
 class MainMessagesViewModel: ObservableObject {
   
@@ -23,6 +45,33 @@ class MainMessagesViewModel: ObservableObject {
     }
     
     fetchCurrentUser()
+    fetchRecentMessages()
+  }
+  
+  @Published var recentMessages = [RecentMessage]()
+  
+  private func fetchRecentMessages() {
+    guard let uid = FirebaseManger.shared.auth.currentUser?.uid else {return}
+    
+    FirebaseManger.shared.fireStore
+      .collection("recent_messages")
+      .document(uid)
+      .collection("messages")
+      .addSnapshotListener { querySnapshot, error in
+        if let error = error {
+          self.errorMessage = "Failed to listen for recent message: \(error)"
+          print(error)
+          return
+        }
+        
+        querySnapshot?.documentChanges.forEach({ change  in
+//          if change.type == .added {
+            let docId = change.document.documentID
+            self.recentMessages.append(.init(documentId: docId, data: change.document.data()))
+//          }
+        })
+      }
+    
   }
   
   func fetchCurrentUser() {
@@ -132,10 +181,10 @@ struct MainMessagesView: View {
   // MARK: - MessagesView
   private var messagesView: some View {
     ScrollView {
-      ForEach(0..<10,id: \.self) { num in
+      ForEach(vm.recentMessages) { recentMessage in
         VStack {
           NavigationLink {
-            Text("Destination ")
+            Text("Destination")
           } label: {
             HStack(spacing: 16) {
               Image(systemName: "person.fill")
@@ -143,10 +192,11 @@ struct MainMessagesView: View {
                 .padding(8)
                 .overlay(RoundedRectangle(cornerRadius: 44)
                   .stroke(Color(.label), lineWidth: 1))
-              VStack(alignment: .leading) {
-                Text("User Name")
+              VStack(alignment: .leading, spacing: 8) {
+                Text(recentMessage.email)
                   .font(.system(size: 16, weight: .bold))
-                Text("Message sent to user")
+                  
+                Text(recentMessage.text)
                   .font(.system(size: 14))
                   .foregroundColor(Color(.lightGray))
               }
@@ -155,6 +205,7 @@ struct MainMessagesView: View {
                 .font(.system(size: 14,weight: .semibold))
             }
           }
+          .foregroundColor(Color(.label))
           Divider()
             .padding(.vertical, 8)
         }.padding(.horizontal)
