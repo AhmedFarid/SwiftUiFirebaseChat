@@ -9,27 +9,6 @@ import SwiftUI
 import SDWebImageSwiftUI
 import Firebase
 
-struct RecentMessage: Identifiable {
-  var id: String { documentId }
-  
-  let documentId: String
-  let text, fromId, toId: String
-  let email, profileImageUrl: String
-  let timestamp: Timestamp
-  
-  
-  init(documentId: String,data: [String: Any]) {
-    self.documentId = documentId
-    self.text = data["text"] as? String ?? ""
-    self.timestamp = data["timestamp"] as? Timestamp ?? Timestamp(date: Date())
-    self.email = data["email"] as? String ?? ""
-    self.fromId = data["fromId"] as? String ?? ""
-    self.toId = data["toId"] as? String ?? ""
-    self.profileImageUrl = data["profileImageUrl"] as? String ?? ""
-  }
-  
-}
-
 class MainMessagesViewModel: ObservableObject {
   
   @Published var errorMessage = ""
@@ -57,6 +36,7 @@ class MainMessagesViewModel: ObservableObject {
       .collection("recent_messages")
       .document(uid)
       .collection("messages")
+      .order(by: "timestamp")
       .addSnapshotListener { querySnapshot, error in
         if let error = error {
           self.errorMessage = "Failed to listen for recent message: \(error)"
@@ -65,10 +45,13 @@ class MainMessagesViewModel: ObservableObject {
         }
         
         querySnapshot?.documentChanges.forEach({ change  in
-//          if change.type == .added {
             let docId = change.document.documentID
-            self.recentMessages.append(.init(documentId: docId, data: change.document.data()))
-//          }
+          if let index = self.recentMessages.firstIndex(where: { rm in
+            return rm.documentId == docId
+          }) {
+            self.recentMessages.remove(at: index)
+          }
+          self.recentMessages.insert(.init(documentId: docId, data: change.document.data()), at: 0)
         })
       }
     
@@ -187,25 +170,30 @@ struct MainMessagesView: View {
             Text("Destination")
           } label: {
             HStack(spacing: 16) {
-              Image(systemName: "person.fill")
-                .font(.system(size: 32))
-                .padding(8)
+              WebImage(url: URL(string: recentMessage.profileImageUrl))
+                .resizable()
+                .scaledToFill()
+                .frame(width: 64, height: 64)
+                .clipped()
+                .cornerRadius(64)
                 .overlay(RoundedRectangle(cornerRadius: 44)
                   .stroke(Color(.label), lineWidth: 1))
+                .shadow(radius: 5)
               VStack(alignment: .leading, spacing: 8) {
                 Text(recentMessage.email)
                   .font(.system(size: 16, weight: .bold))
+                  .foregroundColor(Color(.label))
                   
                 Text(recentMessage.text)
                   .font(.system(size: 14))
-                  .foregroundColor(Color(.lightGray))
+                  .foregroundColor(Color(.darkGray))
+                  .multilineTextAlignment(.leading)
               }
               Spacer()
               Text("22d")
                 .font(.system(size: 14,weight: .semibold))
             }
           }
-          .foregroundColor(Color(.label))
           Divider()
             .padding(.vertical, 8)
         }.padding(.horizontal)
